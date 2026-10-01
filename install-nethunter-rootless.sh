@@ -1,8 +1,9 @@
 #!/data/data/com.termux/files/usr/bin/bash
-set -eu
+set -Eeuo pipefail
 
-# Ghost Kali = presentation layer on top of official Kali NetHunter Rootless.
-# Kali supplies the userspace, repositories, packages, dependencies and tools.
+# Ghost Kali backend installer.
+# Downloads and installs the official Kali NetHunter Rootless userspace.
+# Ghost's menu is installed separately and never injected into .bashrc.
 
 readonly OFFICIAL_INSTALLER='https://offs.ec/2MceZWr'
 readonly OFFICIAL_INSTALLER_FALLBACK='https://gitlab.com/kalilinux/nethunter/build-scripts/kali-nethunter-rootless/-/raw/main/install-nethunter-termux'
@@ -10,42 +11,37 @@ readonly installer="$HOME/install-nethunter-termux"
 readonly REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 command -v pkg >/dev/null 2>&1 || {
-    echo "Run this script from Termux."
+    echo "[!] Run this script from Termux."
     exit 1
 }
 
 pkg update -y
 pkg install -y wget coreutils
 
-echo "Downloading the official Kali NetHunter Rootless installer..."
+echo "[+] Downloading Kali's official NetHunter Rootless installer..."
 if ! wget --https-only --secure-protocol=TLSv1_2 -O "$installer" "$OFFICIAL_INSTALLER"; then
-    echo "The Kali short URL could not be reached; trying Kali official GitLab fallback..."
+    echo "[!] Official short URL failed; using Kali's official GitLab source..."
     wget --https-only --secure-protocol=TLSv1_2 -O "$installer" "$OFFICIAL_INSTALLER_FALLBACK"
 fi
-test -s "$installer" || { echo "Official Kali NetHunter installer download failed."; exit 1; }
-chmod 700 "$installer"
 
-echo "Starting the official Kali NetHunter installer..."
+test -s "$installer" || {
+    echo "[!] Official Kali installer download failed."
+    exit 1
+}
+
+chmod 700 "$installer"
+echo "[+] Running the official Kali installer..."
 "$installer"
 rm -f "$installer"
 
 command -v nethunter >/dev/null 2>&1 || {
-    echo "NetHunter is installed but the launcher is not on PATH."
-    echo "Restart Termux and run: nethunter"
+    echo "[!] NetHunter installed, but 'nethunter' is not on PATH."
+    echo "[!] Restart Termux, then run: nethunter"
     exit 1
 }
 
-echo "Updating the official Kali userspace..."
-nethunter apt-get update
-nethunter env DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y
+echo "[+] Installing Ghost Kali's optional presentation layer..."
 
-if [ "${GHOST_KALI_ALL_TOOLS:-1}" = "1" ]; then
-    echo "Installing the official Kali Linux Everything metapackage."
-    echo "This is a very large installation and may require tens of GB."
-    nethunter env DEBIAN_FRONTEND=noninteractive apt-get install -y kali-linux-everything
-fi
-
-# Copy Ghost's presentation layer into the real NetHunter Kali home.
 for f in kali-banner.txt kali-menu.sh; do
     if [ -f "$REPO_DIR/$f" ]; then
         DATA="$(base64 -w 0 "$REPO_DIR/$f")"
@@ -53,15 +49,25 @@ for f in kali-banner.txt kali-menu.sh; do
     fi
 done
 
-WRAPPER_DATA="$(printf '%s\n' '#!/bin/bash' 'exec /home/kali/ghost-Kali/kali-menu.sh "$@"' | base64 -w 0)"
-nethunter bash -c "chmod +x /home/kali/ghost-Kali/kali-menu.sh; echo '$WRAPPER_DATA' | base64 -d > /bin/kali-menu.sh; chmod +x /bin/kali-menu.sh; touch /home/kali/.bashrc; grep -qxF \"cat /home/kali/ghost-Kali/kali-banner.txt\" /home/kali/.bashrc || printf '\\ncat /home/kali/ghost-Kali/kali-banner.txt\\n' >> /home/kali/.bashrc"
+WRAPPER_DATA="$(printf '%s\n'     '#!/bin/bash'     'exec /home/kali/ghost-Kali/kali-menu.sh "$@"' | base64 -w 0)"
 
-nethunter bash -c "touch /home/kali/.bashrc; grep -qF 'export GHOST_KALI_MENU_STARTED=1' /home/kali/.bashrc || printf '%s\\n' '# Ghost Kali startup menu' 'if [[ \\$- == *i* ]] && [[ -z \\"\\$GHOST_KALI_MENU_STARTED\\" ]] && [[ -f /home/kali/ghost-Kali/kali-menu.sh ]]; then' '    export GHOST_KALI_MENU_STARTED=1' '    bash /home/kali/ghost-Kali/kali-menu.sh' 'fi' >> /home/kali/.bashrc"
+nethunter bash -c "echo '$WRAPPER_DATA' | base64 -d > /usr/local/bin/ghost-kali; chmod 755 /usr/local/bin/ghost-kali; chmod 755 /home/kali/ghost-Kali/kali-menu.sh"
+
+# Remove the old Ghost auto-start block installed by older releases.
+nethunter bash -c "if [ -f /home/kali/.bashrc ]; then sed -i '/# Ghost Kali startup menu/,+3d' /home/kali/.bashrc || true; fi"
 
 echo
-echo "Ghost Kali is now connected to the official Kali NetHunter userspace."
-echo "Kali APT repositories provide the installed tools."
-echo "Start it with: nethunter"
+echo "[+] Official Kali Linux userspace installed."
+echo "[+] Enter Kali with: nethunter"
+echo "[+] Or: ./enter-ghost-kali.sh"
+echo "[+] Launch the Ghost menu manually with: ghost-kali"
 echo
+echo "[+] Update Kali later with:"
+echo "    nethunter apt update"
+echo "    nethunter apt full-upgrade"
+echo
+echo "[!] Ghost Kali does not replace the Android kernel."
+echo "[!] On an unrooted phone this is a real Kali userspace running through"
+echo "    NetHunter Rootless/PRoot, not a native Android kernel boot."
 
 exec nethunter
