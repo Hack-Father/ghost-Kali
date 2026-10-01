@@ -1,111 +1,102 @@
-# Ghost Kali - Kali Linux for Termux
+# Ghost Kali: Kali-derived custom build
 
-A complete Kali Linux environment for Termux with essential penetration testing and security tools.
+Ghost Kali is a Kali-derived custom build project designed for building and running a Kali-based environment on supported systems, including Windows through WSL and Android through Kali NetHunter-compatible userspace tools.
 
-## Features
+This project does not claim to replace the official Kali Linux or NetHunter projects. Instead, it is built from official upstream sources, keeps upstream attribution intact, and provides source-backed build guidance for a Kali-based environment.
 
-- Full Kali Linux tools suite
-- Optimized for Termux environment
-- Networking tools (nmap, netcat, etc.)
-- Exploitation frameworks (Metasploit, SQLMap)
-- Password cracking tools (hashcat, john)
-- Reconnaissance tools (curl, wget, whois)
-- Wireless tools (aircrack-ng, wireshark)
-- Web application testing tools (BurpSuite, OWASP ZAP)
+## Project goal
 
-## Prerequisites
+The goal of Ghost Kali is to provide:
 
-- Termux application installed
-- At least 2GB free storage
-- Internet connection for installation
+- a Kali-based rootfs/build workflow for supported Linux environments
+- scripts for Windows WSL setup and Android NetHunter-compatible installation
+- source-backed build guidance using official Kali mirrors and package sources
+- clear notices for upstream licensing and source availability
 
-## Installation
+## Important legal and licensing notice
 
-### 1. Update Termux
-```bash
-pkg update
-pkg upgrade
-```
+This repository is intentionally structured as a Kali-derived project, not an un-attributed fork of Kali Linux.
 
-### 2. Install Python & Essential Tools
-```bash
-pkg install python3 python3-pip curl wget git openssh
-```
+The official Kali Linux project and the Kali NetHunter project remain the upstream sources. Ghost Kali preserves attribution and GPL-compliance expectations by:
 
-### 3. Run the Setup Script
-```bash
-git clone https://github.com/Hack-Father/ghost-Kali.git
-cd ghost-Kali
-bash install.sh
-```
+- using official Kali package repositories and source mirrors
+- keeping upstream notices and license materials intact
+- labeling this project clearly as a Kali-derived custom build
+- providing source availability information for project modifications
 
-## Available Tools
+## Source-backed build model
 
-### Reconnaissance
-- `nmap` - Network mapper
-- `whois` - Domain information
-- `curl` - Data transfer tool
-- `wget` - File downloader
+This project supports a source-backed model rather than a private, closed-source “full Kali distribution” bundle.
 
-### Exploitation
-- `sqlmap` - SQL injection testing
-- `metasploit` - Penetration testing framework
+A compliant source-backed build uses:
 
-### Password Tools
-- `john` - Password cracker
-- `hashcat` - GPU-based password cracking
+- official Kali repositories
+- official Kali source Debian package repositories
+- upstream licensing files and notices
+- a build script that fetches official rootfs and source packages
+- a README and notices that identify upstream authors and licenses
 
-### Networking
-- `netcat` - Network utility
-- `tcpdump` - Network analysis
-- `aircrack-ng` - Wireless security
+## Repository layout
 
-## Usage
+- `build-kali-rootfs.sh` — build a Kali-based rootfs from official upstream packages
+- `NOTICE` — upstream attribution and project notice
+- `SOURCE_AVAILABILITY.md` — GPL/source-availability guidance
+- `INSTALL_WINDOWS.md` — Windows installation using WSL 2 or VirtualBox
+- `INSTALL_ANDROID.md` — Android installation guidance for Kali NetHunter-compatible environments
+- `install-windows-wsl.ps1` — Windows WSL setup helper
+- `install-nethunter-rootless.sh` — Android install helper for NetHunter-compatible rootless setup
+
+## Supported installation models
+
+### Windows
+
+Use WSL 2 with Kali Linux, or use a Kali VM with VirtualBox.
+
+### Android
+
+Use Kali NetHunter Rootless or a supported NetHunter-compatible setup. This project is designed to work as a Kali-derived environment and to provide userspace helpers, not to replace the official NetHunter project.
+
+## Build workflow
+
+Use the build helper from the repository:
 
 ```bash
-# Access the Kali environment
-kali-start
-
-# Run individual tools
-nmap -sV target.com
-sqlmap -u "http://target.com" --dbs
-john hashfile.txt
+bash build-kali-rootfs.sh
 ```
 
-## Quick Command Reference
+This script is designed to:
 
-```bash
-# Network scanning
-nmap -A -sV target.com
+- set up a Kali apt source configuration
+- fetch official package metadata
+- optionally fetch Debian source packages for the build root
+- stage custom project files on top of a Kali-derived rootfs
+- print instructions for custom packaging or deployment
 
-# Web vulnerability scanning
-sqlmap -u "URL" --dbs --batch
+## Recommended usage
 
-# Password cracking
-john --wordlist=wordlist.txt hashfile.txt
-hashcat -m 0 -a 0 hash.txt wordlist.txt
+This project is intended for:
 
-# DNS enumeration
-whois domain.com
-nslookup target.com
-```
+- educational lab builds
+- penetration testing labs
+- authorized security research environments
+- custom deployments built on official Kali packages
+
+Use all security tools only on systems you own or have explicit, written authorization to test.
+
+## Source and upstream references
+
+Official upstream references:
+
+- Kali Linux: https://www.kali.org/
+- Kali documentation: https://www.kali.org/docs/
+- NetHunter: https://www.kali.org/get-kali/#kali-mobile
+
+## Legal note
+
+This is a derivative/custom build model, not a replacement for the official Kali Linux or NetHunter projects. Full source and package distribution must preserve upstream licensing, copyright notices, and source-availability obligations.
+
+If you redistribute a derivative build, you must continue to provide access to the relevant source code and preserve all upstream notices as required by the applicable license terms.
 
 ## Disclaimer
 
-⚠️ **IMPORTANT**: This tool is for authorized security testing and educational purposes only. Unauthorized access to computer systems is illegal. Always obtain proper authorization before conducting security tests.
-
-## Contributing
-
-Contributions are welcome! Feel free to submit pull requests with improvements and new tools.
-
-## License
-
-MIT License - See LICENSE file for details
-
-## Support
-
-For issues and questions, open a GitHub issue or contact the maintainer.
-
----
-
-**Stay ethical, stay legal, and always get permission before testing!**
+Ghost Kali is intended for legitimate, authorized security testing and education only. Unauthorized activity is illegal and unsupported.
