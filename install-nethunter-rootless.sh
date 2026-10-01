@@ -30,5 +30,15 @@ printf '%s\n' 'Starting the official installer. Follow its prompts:'
 "$installer"
 
 rm -f "$installer"
-printf '%s\n' 'When installation finishes, use the nethunter command shown by the installer.'
-printf '%s\n' 'Then clone Ghost Kali inside the Kali session, not the Termux host.'
+
+# Automatically launch the installed Kali NetHunter Rootless session.
+if command -v nethunter >/dev/null 2>&1; then
+    printf '%s\n' 'Launching Kali NetHunter Rootless...'
+    exec nethunter
+elif command -v nh >/dev/null 2>&1; then
+    printf '%s\n' 'Launching Kali NetHunter Rootless...'
+    exec nh
+else
+    printf '%s\n' 'NetHunter was installed, but its launcher is not yet on PATH.'
+    printf '%s\n' 'Restart Termux, then run: nethunter'
+fi
