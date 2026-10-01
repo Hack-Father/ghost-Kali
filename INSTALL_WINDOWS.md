@@ -1,53 +1,61 @@
 # Ghost Kali on Windows
 
-Ghost Kali is distributed on Windows through supported Kali Linux environments rather than as a separate replacement operating system.
+Ghost Kali uses the **official Kali Linux distribution**. On Windows, the supported integration is Kali Linux under **WSL 2**.
 
-## Recommended: WSL 2
+WSL 2 uses a real Linux kernel managed by WSL. It is not Termux/PRoot and it does not use the Android NetHunter userspace. Kali documents WSL 2 as its preferred WSL architecture. citeturn0search5
 
-Requirements:
+## Install
 
-- Windows 10 version 2004 or newer, or Windows 11
-- Administrator access
-- Virtualization enabled in firmware
-- At least 10 GB free storage
-
-Open **PowerShell as Administrator** and run:
+Open **PowerShell as Administrator** in the cloned repository:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process Bypass
-.\install-windows-wsl.ps1
+.\install-windows-wsl.ps1 -InstallGhost
 ```
 
-The script enables WSL, installs the Kali distribution, and opens Kali. Inside Kali, clone Ghost Kali and install only the tools you need:
+The script:
 
-```bash
-git clone https://github.com/Hack-Father/ghost-Kali.git
-cd ghost-Kali
-chmod +x install.sh
-./install.sh
-```
+1. Updates WSL.
+2. Sets WSL 2 as the default.
+3. Installs the official `kali-linux` WSL distribution if it is missing.
+4. Optionally installs Ghost Kali's menu as `ghost-kali`.
 
-Start it later with:
+Enter normal Kali later with:
 
 ```powershell
 wsl -d kali-linux
 ```
 
-## Alternative: VirtualBox
-
-1. Install Oracle VirtualBox from its official website.
-2. Download the official Kali Linux VirtualBox image from `kali.org/get-kali/`.
-3. Import the `.ova` file in VirtualBox.
-4. Allocate at least 4 GB RAM and 2 CPU cores if available.
-5. Start Kali, update it, and clone this repository.
+Inside Kali:
 
 ```bash
-sudo apt update && sudo apt full-upgrade -y
-git clone https://github.com/Hack-Father/ghost-Kali.git
+cat /etc/os-release
 ```
 
-## Notes
+You should see `Kali GNU/Linux Rolling`.
 
-- WSL does not provide monitor mode or USB Wi-Fi features by default.
-- Do not run offensive tools against systems without explicit authorization.
-- This project does not redistribute the Kali operating system; it provides setup helpers and documentation.
+Launch the optional Ghost interface only when wanted:
+
+```bash
+ghost-kali
+```
+
+The menu does **not** replace the Kali shell and is not automatically launched.
+
+## Native Windows warning
+
+WSL 2 is not the same thing as replacing Windows with Kali Linux. If you want Kali to be the computer's booted operating system, download an official Kali ISO from Kali and install it as a bare-metal/dual-boot system. Do not use a Ghost script to overwrite Windows partitions.
+
+Kali provides official installation images through its Get Kali page. citeturn0search3
+
+## Mobile platforms
+
+Android is handled separately. Standard NetHunter Rootless is a Kali userspace running on Android, not a native Kali kernel/OS. Kali documents Rootless, Lite and full NetHunter as separate editions. citeturn0search1
+
+For supported ARM64 mobile devices, Kali NetHunter Pro is the pure-Kali option. Kali currently lists supported devices such as PinePhone/Pro, Poco F1, OnePlus 6/6T, Nothing Phone 1, Xiaomi Mi MIX 2S and SHIFT6mq. citeturn0search0
+
+Ghost Kali must not flash a phone unless an official/device-compatible Kali image and kernel have been verified.
+
+## Security
+
+Use Kali and its security tools only on systems you own or are explicitly authorized to test.
