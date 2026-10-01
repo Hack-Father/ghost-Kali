@@ -53,8 +53,12 @@ WRAPPER_DATA="$(printf '%s\n'     '#!/bin/bash'     'exec /home/kali/ghost-Kali/
 
 nethunter bash -c "echo '$WRAPPER_DATA' | base64 -d > /usr/local/bin/ghost-kali; chmod 755 /usr/local/bin/ghost-kali; chmod 755 /home/kali/ghost-Kali/kali-menu.sh"
 
-# Remove the old Ghost auto-start block installed by older releases.
-nethunter bash -c "if [ -f /home/kali/.bashrc ]; then sed -i '/# Ghost Kali startup menu/,+3d' /home/kali/.bashrc || true; fi"
+# Remove startup hooks from older Ghost Kali releases so 'nethunter'
+# opens a normal Kali shell instead of forcing the Ghost menu/banner.
+nethunter bash -c "if [ -f /home/kali/.bashrc ]; then
+    sed -i '/# Ghost Kali startup menu/,+3d' /home/kali/.bashrc || true
+    sed -i '\|cat /home/kali/ghost-Kali/kali-banner.txt|d' /home/kali/.bashrc || true
+fi"
 
 echo
 echo "[+] Official Kali Linux userspace installed."
