@@ -7,6 +7,7 @@ set -eu
 readonly OFFICIAL_INSTALLER='https://offs.ec/2MceZWr'
 readonly OFFICIAL_INSTALLER_FALLBACK='https://gitlab.com/kalilinux/nethunter/build-scripts/kali-nethunter-project/-/raw/master/nethunter-rootless/install-nethunter-termux'
 readonly installer="$HOME/install-nethunter-termux"
+readonly REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 command -v pkg >/dev/null 2>&1 || {
     echo "Run this script from Termux."
@@ -45,7 +46,6 @@ if [ "${GHOST_KALI_ALL_TOOLS:-1}" = "1" ]; then
 fi
 
 # Copy Ghost's presentation layer into the real NetHunter Kali home.
-REPO_DIR="$PWD"
 for f in kali-banner.txt kali-menu.sh; do
     if [ -f "$REPO_DIR/$f" ]; then
         DATA="$(base64 -w 0 "$REPO_DIR/$f")"
