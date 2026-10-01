@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Ghost Kali rootfs build script
-# A Kali-derived custom build approach that uses official upstream sources.
-# This script does not bundle proprietary or closed-source code.
+# Ghost Kali
+# Powered by official Kali Linux repositories and upstream Kali package sources.
+# This script is a Kali-derived custom build helper and does not replace the official Kali project.
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TARGET_DIR="${1:-$REPO_DIR/build-rootfs}"
@@ -25,41 +25,35 @@ fi
 mkdir -p "$TARGET_DIR"
 
 cat > /tmp/ghost-kali-sources.list <<EOF
-# Official Kali apt sources
-# These are upstream sources used to build a Kali-derived environment.
+# Official Kali Linux upstream apt sources
+# These are the canonical upstream repositories for a Kali-derived build.
 deb http://http.kali.org/kali $SUITE main contrib non-free non-free-firmware
-# Debian source packages are enabled here to support source-backed builds.
 deb-src http://http.kali.org/kali $SUITE main contrib non-free non-free-firmware
 EOF
 
 cp /tmp/ghost-kali-sources.list /etc/apt/sources.list.d/ghost-kali.sources.list
-
 apt-get update
 
-# Build a minimal Kali rootfs using upstream Kali packages.
-# This is the supported source-backed model.
+# Create a minimal Kali-based rootfs from official Kali package sources.
 debootstrap \
   --arch "$ARCH" \
   --variant=minbase \
   --components=main,contrib,non-free,non-free-firmware \
   "$SUITE" "$TARGET_DIR" http://http.kali.org/kali
 
-# Install common Kali utilities if the user wants them in the rootfs.
-# These packages are fetched from upstream Kali package repositories.
+# Install common utilities from the official Kali repos.
 chroot "$TARGET_DIR" /bin/bash -lc "apt-get update && apt-get install -y --no-install-recommends python3 git curl wget nmap whois john hashcat netcat-openbsd tcpdump openssl"
 
-# Provide a source availability path for users who need upstream source packages.
 mkdir -p "$TARGET_DIR/usr/local/share/ghost-kali"
 cat > "$TARGET_DIR/usr/local/share/ghost-kali/README.txt" <<EOF
-Ghost Kali build notes
+Ghost Kali rootfs notes
 
-This rootfs is built from official Kali package repositories.
-Source code can be retrieved using apt-get source for the relevant packages.
-Please preserve Kali and upstream licensing notices and source availability.
+This rootfs is powered by official Kali Linux upstream repositories.
+The underlying sources remain the official Kali Linux project and package archives.
+Please preserve upstream advisories, licensing files, and source availability notices.
 EOF
 
-# Optionally fetch source packages for the default installed tools.
-# This keeps the build source-backed and transparent.
+# Fetch source packages where relevant to support source-backed builds.
 chroot "$TARGET_DIR" /bin/bash -lc "apt-get source nmap || true"
 chroot "$TARGET_DIR" /bin/bash -lc "apt-get source john || true"
 
@@ -68,11 +62,11 @@ Ghost Kali rootfs build complete.
 
 Build output: $TARGET_DIR
 
-This build is a Kali-derived custom rootfs based on upstream Kali package sources.
-If you redistribute it, preserve the official Kali notices and GPL source availability.
+This build is powered by official Kali Linux upstream sources and uses the official Kali repositories.
+If you redistribute it, preserve Kali licensing and source availability notices.
 
 Next steps:
-  1. Customize the rootfs with your branding or scripts.
+  1. Customize the rootfs with your own scripts or branding.
   2. Install additional packages from the official Kali repositories.
-  3. Keep upstream licensing files and source availability intact.
+  3. Keep upstream license and source notices intact.
 EOF

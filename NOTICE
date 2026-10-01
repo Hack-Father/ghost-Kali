@@ -1,26 +1,20 @@
 Ghost Kali
-Kali-derived custom build project
 
-This project is based on official Kali Linux sources and package repositories.
-It preserves upstream notices and does not remove Kali attribution.
+Powered by official Kali Linux upstream sources.
 
-Kali Linux and Kali NetHunter are the upstream sources.
-Ghost Kali is a derivative/custom build project that adds supporting scripts,
-installation guides, and build tooling while keeping the original upstream
-licensing and attribution intact.
+This project is built around the official Kali Linux ecosystem and is intended to remain aligned with the official Kali package repositories, licensing requirements, and upstream source model.
 
-This repository is intended for authorized testing and education only.
-
-Upstream projects:
+Key upstream references:
 - Kali Linux: https://www.kali.org/
-- Kali documentation: https://www.kali.org/docs/
+- Kali docs: https://www.kali.org/docs/
 - Kali NetHunter: https://www.kali.org/get-kali/#kali-mobile
 
-Important licensing note:
-- Maintain the relevant upstream copyright notices.
-- Preserve the official Kali and Kali NetHunter notices and license text.
-- Provide source access or source information when redistributing derivative builds.
-- Ensure your distribution complies with the applicable GPL and upstream package licenses.
+Important notice:
+- Ghost Kali is a Kali-derived custom build project.
+- It does not replace the official Kali Linux project.
+- It does not replace the official Kali NetHunter project.
+- It keeps the official Kali notices, source relationships, and licensing obligations visible.
 
-This project is not a substitute for the official Kali Linux or NetHunter projects.
-It is a custom build and integration project that follows the upstream source model.
+When redistributing derivative builds, preserve the relevant upstream license files, copyright notices, and source-access information.
+
+This repository is for authorized security testing, education, and legitimate system administration use only.

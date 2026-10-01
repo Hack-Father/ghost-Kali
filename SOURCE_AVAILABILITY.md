@@ -1,42 +1,39 @@
-# Source availability and licensing guidance
+# Source availability and compliance
 
-This project follows a Kali-derived source-backed build model.
+Ghost Kali is powered by official Kali Linux and follows the official upstream source model.
 
-## What this means
+## Source-backed model
 
-This repository does not claim to ship the complete, private source of the entire Kali Linux project in a closed, non-source form. Instead, it provides:
+This project is designed to use:
 
-- a build script for a Kali-based rootfs
-- installation guides for supported environments
-- attribution and legal notices
-- instructions for obtaining upstream source packages and source code from official Kali repositories
+- official Kali Linux package repositories
+- official Kali source repositories
+- official Kali documentation and package metadata
+- official Kali NetHunter guidance for Android-related support
 
-## Required upstream source handling
+## Compliance expectations
 
-If you redistribute a custom Kali-derived build, you should:
+If you redistribute a Kali-derived custom build, keep the following intact:
 
-1. Keep upstream copyright and license notices intact.
-2. Retain the original package license metadata.
-3. Provide access to the source code for your modifications.
-4. Include upstream notices for Kali Linux and any upstream components used.
-5. Use official source repositories when possible.
+1. all upstream copyright notices
+2. relevant license files from Kali and any packages used
+3. source access or source metadata for your modifications
+4. attribution to the official Kali Linux and Kali NetHunter projects
 
-## Source retrieval from official Kali repositories
+## Retrieving source code from Kali
 
-Use the official Kali source repositories:
+Use the official Kali source repositories when you need package source code:
 
 ```bash
 apt-get source <package-name>
 ```
 
-or download official source metadata from the Kali package archive.
+This keeps the project aligned with the official Kali source distribution model.
 
 ## NetHunter note
 
-Kali NetHunter must be treated as its own upstream project when used on Android. This project does not replace or override the official NetHunter project. It only provides a compatible userspace helper and install guidance.
+For Android-related functionality, use the official Kali NetHunter project and its supported device guidance. This project is not a substitute for the upstream NetHunter project; it only provides a compatible environment and supporting documentation.
 
-## Compliance reminder
+## Responsible use
 
-You may build and redistribute a Kali-derived project, but you must respect the license obligations and source availability requirements of the upstream work and packages used.
-
-Use all tools only on systems you own or have explicit permission to test.
+Use this project only on systems you own or have explicit written permission to test.
