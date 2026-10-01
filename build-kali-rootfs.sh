@@ -108,6 +108,28 @@ cat > "$TARGET_DIR/etc/motd" <<'MOTDEOF'
                                     c
                                     .
                                     .
+MOTDEOF'
+       ....:ccc;.
+      ......'''':Icd,
+   ....''''........:Id;
+....''''.................:Id;
+       .';;;;;;;,,..a,
+      .''''.        0xacc:..   ...
+   ....             .GNUc;;;coKIdc',,
+                      GNs          ':dds.
+                     dHc              :80;
+                     UN                ..e.
+                    ;Vd                 ..e.
+                    ;XS
+                      .d08dic;,,.
+                         .',;cd3id::,.
+                              .;d;.';:;.
+                                'd,    .'.
+                                  ;3   ..
+                                   ,e
+                                    c
+                                    .
+                                    .
 
 Kali GNU/Linux Rolling — Ghost Kali userspace
 Powered by official Kali Linux upstream sources.
