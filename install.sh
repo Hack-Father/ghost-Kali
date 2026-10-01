@@ -540,6 +540,12 @@ bash $PREFIX/bin/kali-menu.sh
 EOF
     
     chmod +x $PREFIX/bin/kali-menu.sh
+
+    # Keep the installed menu synchronized with the repository copy when available.
+    if [ -f "$HOME/ghost-Kali/kali-menu.sh" ]; then
+        cp "$HOME/ghost-Kali/kali-menu.sh" "$PREFIX/bin/kali-menu.sh"
+        chmod +x "$PREFIX/bin/kali-menu.sh"
+    fi
     print_success "Menu created"
     
     # Update bashrc with aliases
