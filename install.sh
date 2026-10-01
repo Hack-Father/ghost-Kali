@@ -327,6 +327,14 @@ main() {
 # Ghost Kali Interactive Menu
 
 clear
+
+# Display the Ghost Kali banner from the repository when available.
+BANNER_FILE="$HOME/ghost-Kali/kali-banner.txt"
+if [[ -f "$BANNER_FILE" ]]; then
+    cat "$BANNER_FILE"
+    echo ""
+fi
+
 echo "╔════════════════════════════════════════════════════════╗"
 echo "║  Ghost Kali - Complete Kali Linux Suite for Termux     ║"
 echo "╚════════════════════════════════════════════════════════╝"
