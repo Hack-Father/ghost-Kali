@@ -2,7 +2,17 @@
 
 # Ghost Kali - Interactive Menu
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BANNER_FILE="$SCRIPT_DIR/kali-banner.txt"
+
 clear
+
+# Show the Ghost Kali banner after clearing the terminal so it remains visible.
+if [[ -f "$BANNER_FILE" ]]; then
+    cat "$BANNER_FILE"
+    echo ""
+fi
+
 echo "╔════════════════════════════════════════════════════════╗"
 echo "║      Ghost Kali - Kali Linux Tools for Termux          ║"
 echo "╚════════════════════════════════════════════════════════╝"
