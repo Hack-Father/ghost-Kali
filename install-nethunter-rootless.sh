@@ -31,6 +31,15 @@ printf '%s\n' 'Starting the official installer. Follow its prompts:'
 
 rm -f "$installer"
 
+# Install the custom Ghost Kali banner into the NetHunter user's shell.
+REPO_DIR="$PWD"
+BANNER_FILE="$REPO_DIR/kali-banner.txt"
+if [[ -f "$BANNER_FILE" ]] && command -v nethunter >/dev/null 2>&1; then
+    printf '%s\n' 'Installing Ghost Kali banner into NetHunter...'
+    BANNER_B64="$(base64 -w 0 "$BANNER_FILE")"
+    nethunter -c "echo '$BANNER_B64' | base64 -d > /home/kali/.ghost-banner && touch /home/kali/.bashrc && grep -qxF 'cat ~/.ghost-banner' /home/kali/.bashrc || printf '\\ncat ~/.ghost-banner\\n' >> /home/kali/.bashrc"
+fi
+
 # Automatically launch the installed Kali NetHunter Rootless session.
 if command -v nethunter >/dev/null 2>&1; then
     printf '%s\n' 'Launching Kali NetHunter Rootless...'
