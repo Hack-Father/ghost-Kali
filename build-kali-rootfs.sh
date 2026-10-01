@@ -1,21 +1,14 @@
-#!/usr/bin/env bash
+#!/data/data/com.termux/files/usr/bin/bash
 set -Eeuo pipefail
 
-# Ghost Kali no longer builds a separate custom rootfs.
-# The supported Android backend is official Kali NetHunter Rootless.
+# Rebuild/install the Kali Linux userspace from official Kali sources.
+# This intentionally delegates the rootfs installation to Kali's official
+# NetHunter Rootless installer instead of maintaining a private rootfs.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-if command -v nethunter >/dev/null 2>&1; then
-    echo "[+] Official Kali NetHunter is available."
-    echo "[+] Ghost Kali uses that Kali userspace directly."
-    exit 0
-fi
+echo "[+] Ghost Kali uses the official Kali Linux userspace."
+echo "[+] Reinstall/rebuild it with the official Kali NetHunter Rootless flow."
+echo
 
-if [[ -x "$SCRIPT_DIR/install-nethunter-rootless.sh" ]]; then
-    echo "[+] NetHunter is not installed. Starting the official installer..."
-    exec "$SCRIPT_DIR/install-nethunter-rootless.sh"
-fi
-
-echo "[!] install-nethunter-rootless.sh not found." >&2
-exit 1
+exec "$SCRIPT_DIR/install-nethunter-rootless.sh"
