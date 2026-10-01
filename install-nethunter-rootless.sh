@@ -53,7 +53,13 @@ for f in kali-banner.txt kali-menu.sh; do
     fi
 done
 
-nethunter bash -c 'chmod +x /home/kali/ghost-Kali/kali-menu.sh; touch /home/kali/.bashrc; grep -qxF "cat /home/kali/ghost-Kali/kali-banner.txt" /home/kali/.bashrc || printf "\ncat /home/kali/ghost-Kali/kali-banner.txt\n" >> /home/kali/.bashrc'
+nethunter bash -c 'chmod +x /home/kali/ghost-Kali/kali-menu.sh; cat > /bin/kali-menu.sh <<\'WRAPPER\'
+#!/bin/bash
+exec /home/kali/ghost-Kali/kali-menu.sh "$@"
+WRAPPER
+chmod +x /bin/kali-menu.sh
+touch /home/kali/.bashrc
+grep -qxF "cat /home/kali/ghost-Kali/kali-banner.txt" /home/kali/.bashrc || printf "\ncat /home/kali/ghost-Kali/kali-banner.txt\n" >> /home/kali/.bashrc'
 
 nethunter bash -c "touch /home/kali/.bashrc; grep -qF 'export GHOST_KALI_MENU_STARTED=1' /home/kali/.bashrc || printf '%s\\n' '# Ghost Kali startup menu' 'if [[ \\$- == *i* ]] && [[ -z \\"\\$GHOST_KALI_MENU_STARTED\\" ]] && [[ -f /home/kali/ghost-Kali/kali-menu.sh ]]; then' '    export GHOST_KALI_MENU_STARTED=1' '    bash /home/kali/ghost-Kali/kali-menu.sh' 'fi' >> /home/kali/.bashrc"
 
