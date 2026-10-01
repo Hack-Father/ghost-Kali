@@ -5,6 +5,8 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Color codes for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -323,8 +325,8 @@ main() {
     mkdir -p $PREFIX/share/ghost-kali
 
     # Install the banner alongside the Ghost Kali menu so every installation has it.
-    if [ -f "$HOME/ghost-Kali/kali-banner.txt" ]; then
-        cp "$HOME/ghost-Kali/kali-banner.txt" "$PREFIX/share/ghost-kali/kali-banner.txt"
+    if [ -f "$SCRIPT_DIR/kali-banner.txt" ]; then
+        cp "$SCRIPT_DIR/kali-banner.txt" "$PREFIX/share/ghost-kali/kali-banner.txt"
     fi
     
     # Main menu
@@ -548,8 +550,8 @@ EOF
     chmod +x $PREFIX/bin/kali-menu.sh
 
     # Keep the installed menu synchronized with the repository copy when available.
-    if [ -f "$HOME/ghost-Kali/kali-menu.sh" ]; then
-        cp "$HOME/ghost-Kali/kali-menu.sh" "$PREFIX/bin/kali-menu.sh"
+    if [ -f "$SCRIPT_DIR/kali-menu.sh" ]; then
+        cp "$SCRIPT_DIR/kali-menu.sh" "$PREFIX/bin/kali-menu.sh"
         chmod +x "$PREFIX/bin/kali-menu.sh"
     fi
     print_success "Menu created"
