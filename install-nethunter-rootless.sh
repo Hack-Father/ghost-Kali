@@ -34,8 +34,8 @@ rm -f "$installer"
 # Install Kali's official tool metapackage inside the NetHunter Kali userspace.
 # Set GHOST_KALI_ALL_TOOLS=0 before running to skip the large everything set.
 if command -v nethunter >/dev/null 2>&1 && [[ "${GHOST_KALI_ALL_TOOLS:-1}" == "1" ]]; then
-    printf '%s\\n' 'Installing Kali Linux Everything inside NetHunter. This can require tens of GB of storage and take a long time.'
-    nethunter -c 'apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y kali-linux-everything'
+    printf '%s\n' 'Installing Kali Linux Everything inside NetHunter. This can require tens of GB of storage and take a long time.'
+    nethunter apt-get update && nethunter env DEBIAN_FRONTEND=noninteractive apt-get install -y kali-linux-everything
 fi
 
 # Install the custom Ghost Kali banner into the NetHunter user's shell.
