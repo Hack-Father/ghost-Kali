@@ -1,13 +1,14 @@
-#!/usr/bin/env bash
+#!/data/data/com.termux/files/usr/bin/bash
 set -Eeuo pipefail
 
-# Enter Ghost Kali through the official Kali NetHunter userspace.
-# No separate Ghost rootfs is used on Android.
+# Enter the real Kali Linux userspace.
+# The Ghost Kali menu is separate: run 'ghost-kali' inside Kali.
 
 if command -v nethunter >/dev/null 2>&1; then
     exec nethunter
 fi
 
-echo "[!] Kali NetHunter is not installed or 'nethunter' is not on PATH." >&2
-echo "[!] From Termux, run: ./install-nethunter-rootless.sh" >&2
+echo "[!] Kali Linux userspace is not installed."
+echo "[!] From Termux run:"
+echo "    cd ~/ghost-Kali && ./install.sh"
 exit 1
