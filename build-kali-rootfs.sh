@@ -1,72 +1,117 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -Eeuo pipefail
 
-# Ghost Kali
-# Powered by official Kali Linux repositories and upstream Kali package sources.
-# This script is a Kali-derived custom build helper and does not replace the official Kali project.
+# Ghost Kali — a Kali-derived userspace powered by official Kali Linux sources.
+# This script does not replace the official Kali Linux or NetHunter projects.
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TARGET_DIR="${1:-$REPO_DIR/build-rootfs}"
-DISTRO="kali"
 SUITE="kali-rolling"
+MIRROR="https://http.kali.org/kali"
+KEYRING_URL="https://archive.kali.org/archive-keyring.gpg"
+KEYRING="/usr/share/keyrings/kali-archive-keyring.gpg"
 ARCH="$(dpkg --print-architecture 2>/dev/null || echo amd64)"
 
-if [[ $EUID -ne 0 ]]; then
-  echo "This script must be run as root."
-  exit 1
-fi
+log() { printf '\n[ghost-kali] %s\n' "$*"; }
+fatal() { printf '\n[ghost-kali] ERROR: %s\n' "$*" >&2; exit 1; }
 
-if ! command -v debootstrap >/dev/null 2>&1; then
-  echo "Installing debootstrap..."
+[[ $EUID -eq 0 ]] || fatal "Run this script as root (for example: sudo $0 /root/ghost-kali-rootfs)."
+command -v debootstrap >/dev/null 2>&1 || {
+  log "Installing debootstrap"
   apt-get update
-  apt-get install -y debootstrap
+  apt-get install -y --no-install-recommends debootstrap ca-certificates curl wget
+}
+command -v curl >/dev/null 2>&1 || apt-get install -y --no-install-recommends curl ca-certificates
+
+install -d -m 0755 "$(dirname "$KEYRING")"
+log "Installing the official Kali archive keyring"
+curl --fail --location --retry 3 --proto '=https' --tlsv1.2 "$KEYRING_URL" -o "$KEYRING"
+chmod 0644 "$KEYRING"
+
+# Keep the host configuration scoped to Kali and explicitly signed by the official key.
+install -d -m 0755 /etc/apt/sources.list.d
+cat > /etc/apt/sources.list.d/ghost-kali.list <<EOF
+# Official Kali Linux upstream repository for Ghost Kali
+# Remove this file if you do not want Kali packages on the host.
+deb [signed-by=$KEYRING] $MIRROR $SUITE main contrib non-free non-free-firmware
+deb-src [signed-by=$KEYRING] $MIRROR $SUITE main contrib non-free non-free-firmware
+EOF
+
+log "Checking the signed Kali repository"
+apt-get update -o Dir::Etc::sourcelist=/etc/apt/sources.list.d/ghost-kali.list \
+  -o Dir::Etc::sourceparts=- -o APT::Get::List-Cleanup=0
+
+if [[ -e "$TARGET_DIR/etc/os-release" ]]; then
+  log "Using existing rootfs at $TARGET_DIR"
+else
+  mkdir -p "$TARGET_DIR"
+  log "Creating $ARCH Kali rootfs from official sources"
+  debootstrap \
+    --arch="$ARCH" \
+    --variant=minbase \
+    --components=main,contrib,non-free,non-free-firmware \
+    --keyring="$KEYRING" \
+    "$SUITE" "$TARGET_DIR" "$MIRROR"
 fi
 
-mkdir -p "$TARGET_DIR"
+# Make the key available inside the target before any apt operation.
+install -d -m 0755 "$TARGET_DIR/usr/share/keyrings"
+install -m 0644 "$KEYRING" "$TARGET_DIR$KEYRING"
 
-cat > /tmp/ghost-kali-sources.list <<EOF
-# Official Kali Linux upstream apt sources
-# These are the canonical upstream repositories for a Kali-derived build.
-deb http://http.kali.org/kali $SUITE main contrib non-free non-free-firmware
-deb-src http://http.kali.org/kali $SUITE main contrib non-free non-free-firmware
+cat > "$TARGET_DIR/etc/apt/sources.list.d/kali.sources" <<EOF
+Types: deb deb-src
+URIs: $MIRROR
+Suites: $SUITE
+Components: main contrib non-free non-free-firmware
+Signed-By: $KEYRING
 EOF
 
-cp /tmp/ghost-kali-sources.list /etc/apt/sources.list.d/ghost-kali.sources.list
-apt-get update
+# Do not depend on host chroot support: this also works in a normal Debian VM.
+run_target() { chroot "$TARGET_DIR" /usr/bin/env -i HOME=/root PATH=/usr/sbin:/usr/bin:/sbin:/bin "/bin/bash" -c "$*"; }
 
-# Create a minimal Kali-based rootfs from official Kali package sources.
-debootstrap \
-  --arch "$ARCH" \
-  --variant=minbase \
-  --components=main,contrib,non-free,non-free-firmware \
-  "$SUITE" "$TARGET_DIR" http://http.kali.org/kali
+log "Installing the base Ghost Kali environment"
+run_target 'export DEBIAN_FRONTEND=noninteractive; apt-get update; apt-get install -y --no-install-recommends bash-completion ca-certificates curl git iproute2 less nano net-tools nmap openssl procps python3 sudo wget whois'
 
-# Install common utilities from the official Kali repos.
-chroot "$TARGET_DIR" /bin/bash -lc "apt-get update && apt-get install -y --no-install-recommends python3 git curl wget nmap whois john hashcat netcat-openbsd tcpdump openssl"
+install -d -m 0755 "$TARGET_DIR/usr/local/share/ghost-kali" "$TARGET_DIR/etc/profile.d"
+cat > "$TARGET_DIR/etc/motd" <<'EOF'
+\033[1;31m\n  _  __     _ _   _   _  __ _   _\n | |/ /__ _| | | (_) | |/ /| | | |\n | ' // _` | | | | | | ' / | | | |\n | . \u005c (_| | | | | | | . \u005c | |_| |\n |_|\u005c_\__,_|_|_| |_| |_|\u005c_\u005c_\__, |\n                              |___/\n\033[0m
+Kali GNU/Linux Rolling — Ghost Kali userspace
+Powered by official Kali Linux upstream sources.
 
-mkdir -p "$TARGET_DIR/usr/local/share/ghost-kali"
+Use only on systems you own or are authorized to test.
+EOF
+cat > "$TARGET_DIR/etc/profile.d/ghost-kali.sh" <<'EOF'
+# Ghost Kali shell identity; Kali attribution is intentionally preserved.
+export GHOST_KALI=1
+export GHOST_KALI_ROOTFS=/
+export PS1='\[\033[01;31m\]ghost-kali\[\033[00m\]@\h:\w\$ '
+EOF
 cat > "$TARGET_DIR/usr/local/share/ghost-kali/README.txt" <<EOF
-Ghost Kali rootfs notes
+Ghost Kali is a Kali-derived userspace powered by official Kali Linux sources.
+Identity: Kali GNU/Linux Rolling (Ghost Kali userspace)
+Repository: $MIRROR
+Suite: $SUITE
+Architecture: $ARCH
 
-This rootfs is powered by official Kali Linux upstream repositories.
-The underlying sources remain the official Kali Linux project and package archives.
-Please preserve upstream advisories, licensing files, and source availability notices.
+This is not the official Kali Linux or Kali NetHunter distribution. Preserve
+upstream attribution, license files, and source-availability obligations.
 EOF
 
-# Fetch source packages where relevant to support source-backed builds.
-chroot "$TARGET_DIR" /bin/bash -lc "apt-get source nmap || true"
-chroot "$TARGET_DIR" /bin/bash -lc "apt-get source john || true"
+log "Writing environment metadata"
+run_target 'printf "Kali GNU/Linux Rolling (Ghost Kali userspace)\\n" > /etc/ghost-kali-release'
 
 cat <<EOF
+
 Ghost Kali rootfs build complete.
 
-Build output: $TARGET_DIR
+Rootfs: $TARGET_DIR
+Architecture: $ARCH
+Repository: $MIRROR
 
-This build is powered by official Kali Linux upstream sources and uses the official Kali repositories.
-If you redistribute it, preserve Kali licensing and source availability notices.
+Enter it with:
+  $REPO_DIR/enter-ghost-kali.sh $TARGET_DIR
 
-Next steps:
-  1. Customize the rootfs with your own scripts or branding.
-  2. Install additional packages from the official Kali repositories.
-  3. Keep upstream license and source notices intact.
+Verify inside:
+  cat /etc/os-release
+  cat /etc/ghost-kali-release
 EOF
