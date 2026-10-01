@@ -16,19 +16,15 @@ need_cmd() {
 run_sqlmap() {
     if command -v sqlmap >/dev/null 2>&1; then
         sqlmap "$@"
-    elif [[ -f "$HOME/sqlmap/sqlmap.py" ]]; then
-        python3 "$HOME/sqlmap/sqlmap.py" "$@"
     else
-        echo "[!] sqlmap is not installed."
-        echo "    Install with: sudo apt install -y sqlmap"
+        echo "[!] sqlmap is not installed in Kali."
+        echo "    Install with: apt-get install -y sqlmap"
     fi
 }
 
 run_msfconsole() {
     if command -v msfconsole >/dev/null 2>&1; then
         msfconsole "$@"
-    elif [[ -x "$HOME/metasploit-framework/msfconsole" ]]; then
-        "$HOME/metasploit-framework/msfconsole" "$@"
     else
         echo "[!] Metasploit is not installed."
         echo "    Install with: sudo apt install -y metasploit-framework"
@@ -43,7 +39,7 @@ show_menu() {
     fi
 
     echo "╔════════════════════════════════════════════════════════╗"
-    echo "║      Ghost Kali - Kali Linux Tools for Termux          ║"
+    echo "║      Ghost Kali - Official Kali NetHunter Tools        ║"
     echo "╚════════════════════════════════════════════════════════╝"
     echo ""
     echo "Select a tool category:"
