@@ -3,7 +3,7 @@
 # Ghost Kali - Interactive Menu
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BANNER_FILE="$SCRIPT_DIR/kali-banner.txt"
+BANNER_FILE="${GHOST_KALI_BANNER:-$PREFIX/share/ghost-kali/kali-banner.txt}"
 
 clear
 
