@@ -7,6 +7,39 @@ BANNER_FILE="${GHOST_KALI_BANNER:-$PREFIX/share/ghost-kali/kali-banner.txt}"
 
 clear
 
+# Kali/NetHunter helpers
+need_cmd() {
+    local cmd="$1" pkg="$2"
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+        echo "[!] $cmd is not installed."
+        echo "    In Kali/NetHunter, install it with: sudo apt install -y $pkg"
+        return 1
+    fi
+    return 0
+}
+
+run_sqlmap() {
+    if command -v sqlmap >/dev/null 2>&1; then
+        sqlmap "$@"
+    elif [[ -f "$HOME/sqlmap/sqlmap.py" ]]; then
+        python3 "$HOME/sqlmap/sqlmap.py" "$@"
+    else
+        echo "[!] sqlmap is not installed."
+        echo "    Install it with: sudo apt install -y sqlmap"
+    fi
+}
+
+run_msfconsole() {
+    if command -v msfconsole >/dev/null 2>&1; then
+        msfconsole "$@"
+    elif [[ -x "run_msfconsole" ]]; then
+        "$HOME/metasploit-framework/msfconsole" "$@"
+    else
+        echo "[!] msfconsole is not installed."
+        echo "    Install it with: sudo apt install -y metasploit-framework"
+    fi
+}
+
 # Show the Ghost Kali banner after clearing the terminal so it remains visible.
 if [[ -f "$BANNER_FILE" ]]; then
     cat "$BANNER_FILE"
@@ -45,15 +78,15 @@ case $choice in
         case $recon in
             1)
                 read -p "Enter domain: " domain
-                whois $domain
+                need_cmd whois whois || continue\n                whois "$domain"
                 ;;
             2)
                 read -p "Enter hostname/IP: " host
-                nslookup $host
+                need_cmd nslookup bind9-dnsutils || continue\n                nslookup "$host"
                 ;;
             3)
                 read -p "Enter IP address: " ip
-                nslookup -type=PTR $ip
+                need_cmd nslookup bind9-dnsutils || continue\n                nslookup -type=PTR "$ip"
                 ;;
         esac
         ;;
@@ -95,15 +128,15 @@ case $choice in
         case $web_choice in
             1)
                 read -p "Enter target URL: " url
-                python3 $HOME/sqlmap/sqlmap.py -u "$url" --dbs
+                run_sqlmap -u "$url" --dbs
                 ;;
             2)
                 read -p "Enter URL: " url
-                curl -I $url
+                need_cmd curl curl || continue\n                curl -I "$url"
                 ;;
             3)
                 read -p "Enter URL: " url
-                curl -v $url 2>&1 | head -20
+                need_cmd curl curl || continue\n                curl -v "$url" 2>&1 | head -20
                 ;;
         esac
         ;;
@@ -119,18 +152,18 @@ case $choice in
         case $crack_choice in
             1)
                 read -p "Enter hash file path: " hashfile
-                john $hashfile
+                need_cmd john john || continue\n                john "$hashfile"
                 ;;
             2)
                 echo "Usage: hashcat -m [hash_type] -a [attack_mode] hash.txt wordlist.txt"
                 read -p "Enter hash file: " hfile
                 read -p "Enter wordlist: " wlist
-                hashcat -m 0 -a 0 $hfile $wlist
+                need_cmd hashcat hashcat || continue\n                hashcat -m 0 -a 0 "$hfile" "$wlist"
                 ;;
             3)
                 read -p "Enter wordlist path: " wordlist
                 read -p "Enter hash file path: " hashfile
-                john --wordlist=$wordlist $hashfile
+                need_cmd john john || continue\n                john --wordlist="$wordlist" "$hashfile"
                 ;;
         esac
         ;;
@@ -147,7 +180,7 @@ case $choice in
                 $HOME/metasploit-framework/msfconsole
                 ;;
             2)
-                python3 $HOME/sqlmap/sqlmap.py
+                run_sqlmap
                 ;;
         esac
         ;;
@@ -161,10 +194,16 @@ case $choice in
         read -p "Choose: " wireless_choice
         case $wireless_choice in
             1)
-                aircrack-ng
+                need_cmd aircrack-ng aircrack-ng || continue\n                aircrack-ng
                 ;;
             2)
-                wireshark
+                if command -v wireshark >/dev/null 2>&1; then
+                    wireshark
+                elif command -v tshark >/dev/null 2>&1; then
+                    tshark
+                else
+                    echo "[!] Wireshark/TShark is not installed. Install with: sudo apt install -y wireshark tshark"
+                fi
                 ;;
         esac
         ;;
@@ -183,7 +222,7 @@ case $choice in
                 uname -a
                 ;;
             2)
-                ifconfig
+                if command -v ip >/dev/null 2>&1; then ip addr; else need_cmd ifconfig net-tools && ifconfig; fi
                 ;;
             3)
                 df -h
@@ -196,10 +235,13 @@ case $choice in
     8)
         echo ""
         echo "=== Updating Tools ==="
-        pkg update -y
-        pkg upgrade -y
-        cd $HOME/sqlmap && git pull
-        cd $HOME/metasploit-framework && git pull && bundle install
+        if command -v apt-get >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get upgrade -y
+        else
+            echo "[!] Kali apt package manager not found."
+        fi
+        echo "Use the Kali package manager to update installed tools."
         echo "All tools updated successfully!"
         ;;
     9)
