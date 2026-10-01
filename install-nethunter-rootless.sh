@@ -5,6 +5,7 @@ set -eu
 # Kali supplies the userspace, repositories, packages, dependencies and tools.
 
 readonly OFFICIAL_INSTALLER='https://offs.ec/2MceZWr'
+readonly OFFICIAL_INSTALLER_FALLBACK='https://gitlab.com/kalilinux/nethunter/build-scripts/kali-nethunter-project/-/raw/master/nethunter-rootless/install-nethunter-termux'
 readonly installer="$HOME/install-nethunter-termux"
 
 command -v pkg >/dev/null 2>&1 || {
@@ -16,8 +17,11 @@ pkg update -y
 pkg install -y wget coreutils
 
 echo "Downloading the official Kali NetHunter Rootless installer..."
-wget --https-only --secure-protocol=TLSv1_2 -O "$installer" "$OFFICIAL_INSTALLER"
-test -s "$installer" || { echo "NetHunter installer download failed."; exit 1; }
+if ! wget --https-only --secure-protocol=TLSv1_2 -O "$installer" "$OFFICIAL_INSTALLER"; then
+    echo "The Kali short URL could not be reached; trying Kali official GitLab fallback..."
+    wget --https-only --secure-protocol=TLSv1_2 -O "$installer" "$OFFICIAL_INSTALLER_FALLBACK"
+fi
+test -s "$installer" || { echo "Official Kali NetHunter installer download failed."; exit 1; }
 chmod 700 "$installer"
 
 echo "Starting the official Kali NetHunter installer..."
