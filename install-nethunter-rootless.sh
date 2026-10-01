@@ -44,19 +44,13 @@ BANNER_FILE="$REPO_DIR/kali-banner.txt"
 if [[ -f "$BANNER_FILE" ]] && command -v nethunter >/dev/null 2>&1; then
     printf '%s\n' 'Installing Ghost Kali banner into NetHunter...'
     BANNER_B64="$(base64 -w 0 "$BANNER_FILE")"
-    nethunter -c "echo '$BANNER_B64' | base64 -d > /home/kali/.ghost-banner && touch /home/kali/.bashrc && grep -qxF 'cat ~/.ghost-banner' /home/kali/.bashrc || printf '\\ncat ~/.ghost-banner\\n' >> /home/kali/.bashrc"
+    nethunter bash -c "echo '$BANNER_B64' | base64 -d > /home/kali/.ghost-banner && touch /home/kali/.bashrc && grep -qxF 'cat ~/.ghost-banner' /home/kali/.bashrc || printf '\\ncat ~/.ghost-banner\\n' >> /home/kali/.bashrc"
 fi
 
 # Automatically start the existing Ghost Kali menu inside NetHunter.
 if command -v nethunter >/dev/null 2>&1; then
     printf '%s\n' 'Configuring Ghost Kali automatic startup...'
-    nethunter -c "touch /home/kali/.bashrc && grep -qxF 'GHOST_KALI_MENU_STARTED=1' /home/kali/.bashrc || cat >> /home/kali/.bashrc <<'EOF'
-# Ghost Kali automatic startup
-if [[ $- == *i* ]] && [[ -z "$GHOST_KALI_MENU_STARTED" ]] && [[ -f "$HOME/ghost-Kali/kali-menu.sh" ]]; then
-    export GHOST_KALI_MENU_STARTED=1
-    bash "$HOME/ghost-Kali/kali-menu.sh"
-fi
-EOF"
+    nethunter bash -c "touch /home/kali/.bashrc && grep -qxF 'GHOST_KALI_MENU_STARTED=1' /home/kali/.bashrc || printf '%s\\n' '# Ghost Kali automatic startup' 'if [[ $- == *i* ]] && [[ -z \"$GHOST_KALI_MENU_STARTED\" ]] && [[ -f \"$HOME/ghost-Kali/kali-menu.sh\" ]]; then' '    export GHOST_KALI_MENU_STARTED=1' '    bash \"$HOME/ghost-Kali/kali-menu.sh\"' 'fi' >> /home/kali/.bashrc"
 fi
 
 # Automatically launch the installed Kali NetHunter Rootless session.
