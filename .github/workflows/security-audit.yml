@@ -1,0 +1,17 @@
+name: Ghost Kali security audit
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run static security audit
+        run: bash ./audit-ghost-kali.sh
