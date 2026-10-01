@@ -1,55 +1,85 @@
 # Ghost Kali
 
-Ghost Kali is a Kali-derived custom build project powered by official Kali Linux upstream sources.
+Ghost Kali is a custom presentation and tooling layer built on the **official Kali Linux userspace**.
 
-This repository is explicitly designed to be aligned with the official Kali Linux ecosystem, using official Kali package repositories and official Kali documentation as the primary source of truth. It is not a separate closed or hidden fork; it is a source-backed custom environment built around the official Kali project.
+## Architecture
 
-## Core principle
+Ghost Kali does **not** maintain a private Linux distribution or a modified Kali rootfs.
 
-Ghost Kali is powered by:
+On Android/Termux, the project uses Kali's official **NetHunter Rootless** installation flow. Kali publishes the rootfs images and the NetHunter Rootless installer through its own infrastructure.
 
-- official Kali Linux package repositories
-- official Kali Debian source repositories
-- official Kali documentation and package metadata
-- official Kali NetHunter guidance for Android-related support
+That means:
 
-The project preserves upstream attribution and licensing notices, rather than replacing or obscuring the original Kali project.
+- Kali Linux supplies the Linux userspace.
+- Kali's official repositories supply packages and updates.
+- Kali's official NetHunter Rootless project supplies the Android/Termux launcher and PRoot integration.
+- Ghost Kali supplies the optional menu, banner and convenience scripts.
 
-## What this project is
+This is a real Kali Linux userspace, but on an unrooted Android phone it is **not a native Linux kernel installation**. Android's kernel remains underneath it.
 
-Ghost Kali is a Kali-based custom build and helper project intended for:
+## Commands
 
-- custom rootfs creation from official Kali sources
-- Kali-based environments on supported hosts
-- Android-compatible installation guidance using the official Kali NetHunter flow
-- code and documentation that respect upstream licensing and source availability
+From Termux:
 
-## What this project is not
+```bash
+cd ~/ghost-Kali
+./install.sh
+```
 
-Ghost Kali is not a replacement for the official Kali Linux distribution or the official Kali NetHunter project.
+Enter the Kali userspace without the Ghost menu:
 
-It does not claim to be a separate proprietary distribution without upstream source attribution. It is a source-backed custom build that remains rooted in the official Kali Linux ecosystem.
+```bash
+nethunter
+```
 
-## Repository goals
+or:
 
-- build a Kali-derived rootfs using official upstream package sources
-- document source availability and license compliance
-- keep Kali attribution clear and visible
-- align with official Kali and NetHunter install guidance
+```bash
+./enter-ghost-kali.sh
+```
 
-## Official upstream references
+Launch the Ghost Kali menu manually:
+
+```bash
+ghost-kali
+```
+
+The menu is deliberately **not** added to `/home/kali/.bashrc`. This keeps `nethunter` as a normal Kali shell.
+
+## Updating Kali
+
+Inside Kali:
+
+```bash
+apt update
+apt full-upgrade
+```
+
+Kali's rolling-release documentation recommends `apt full-upgrade` because package transitions can require dependency changes.
+
+## Tool installation
+
+Install only the toolsets you actually need. For example:
+
+```bash
+apt update
+apt install -y nmap sqlmap metasploit-framework hydra nikto
+```
+
+Kali also provides official metapackages such as `kali-linux-core`, `kali-linux-default`, and `kali-linux-everything`. The Everything metapackage is intentionally very large, so Ghost Kali does not install it automatically.
+
+## Official sources
 
 - Kali Linux: https://www.kali.org/
-- Kali docs: https://www.kali.org/docs/
-- Kali NetHunter: https://www.kali.org/get-kali/#kali-mobile
+- Kali documentation: https://www.kali.org/docs/
+- Kali NetHunter: https://www.kali.org/docs/nethunter/
+- NetHunter Rootless source: https://gitlab.com/kalilinux/nethunter/build-scripts/kali-nethunter-rootless
+- Official Kali rootfs mirror: https://kali.download/nethunter-images/current/rootfs/
 
-## Legal and licensing note
+## Responsible use
 
-This repository follows the official Kali source model.
+Use security tools only against systems you own or have explicit authorization to test.
 
-If you redistribute a custom Kali-derived build, you must keep the original upstream notices, license files, and source-access obligations intact. Any derivative build should continue to reference the official Kali Linux project and preserve all relevant licensing information.
+## License
 
-## Use responsibly
-
-Use Ghost Kali only on systems you own or are explicitly authorized to test.
-
+MIT for Ghost Kali's own project files. Kali Linux and NetHunter components retain their respective upstream licenses and notices.
