@@ -9,6 +9,10 @@ ROOTFS="${1:-$REPO_DIR/rootfs}"
 
 [[ -d "$ROOTFS" ]] || { printf 'Rootfs not found: %s\n' "$ROOTFS" >&2; printf 'Create it with: %s/build-kali-rootfs.sh\n' "$REPO_DIR" >&2; exit 1; }
 
+# Display the custom Ghost Kali banner on entry.
+cat "$REPO_DIR/kali-banner.txt"
+printf '\n'
+
 # Prefer proot for portability (works in Termux and nested environments)
 if command -v proot >/dev/null 2>&1; then
   exec proot -0 \
