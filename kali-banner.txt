@@ -19,8 +19,3 @@
                                     c
                                     .
                                     .
-
-Kali GNU/Linux Rolling — Ghost Kali userspace
-Powered by official Kali Linux upstream sources.
-
-Use only on systems you own or are authorized to test.
