@@ -2,7 +2,7 @@
 # Ghost Kali - Interactive menu for Kali NetHunter
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BANNER_FILE="${GHOST_KALI_BANNER:-$PREFIX/share/ghost-kali/kali-banner.txt}"
+BANNER_FILE="${GHOST_KALI_BANNER:-$HOME/ghost-Kali/kali-banner.txt}"
 
 need_cmd() {
     local cmd="$1" pkg="$2"
