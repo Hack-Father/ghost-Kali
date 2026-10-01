@@ -1,33 +1,13 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-# Enter a Ghost Kali rootfs environment from Termux, proot-distro, or another Linux host.
-# Default rootfs is kept inside this repository so it stays self-contained.
+# Enter Ghost Kali through the official Kali NetHunter userspace.
+# No separate Ghost rootfs is used on Android.
 
-REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOTFS="${1:-$REPO_DIR/rootfs}"
-
-[[ -d "$ROOTFS" ]] || { printf 'Rootfs not found: %s\n' "$ROOTFS" >&2; printf 'Create it with: %s/build-kali-rootfs.sh\n' "$REPO_DIR" >&2; exit 1; }
-
-# Display the custom Ghost Kali banner on entry.
-cat "$REPO_DIR/kali-banner.txt"
-printf '\n'
-
-# Prefer proot for portability (works in Termux and nested environments)
-if command -v proot >/dev/null 2>&1; then
-  exec proot -0 \
-    -r "$ROOTFS" \
-    -b /dev \
-    -b /proc \
-    -b /sys \
-    -b /sdcard \
-    /bin/bash -i
+if command -v nethunter >/dev/null 2>&1; then
+    exec nethunter
 fi
 
-# Fallback to chroot (requires native Linux and root)
-if [[ $EUID -eq 0 ]] && command -v chroot >/dev/null 2>&1; then
-  exec chroot "$ROOTFS" /bin/bash -i
-fi
-
-printf 'Cannot enter rootfs: proot or chroot not available.\n' >&2
+echo "[!] Kali NetHunter is not installed or 'nethunter' is not on PATH." >&2
+echo "[!] From Termux, run: ./install-nethunter-rootless.sh" >&2
 exit 1
