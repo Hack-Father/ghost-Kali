@@ -5,7 +5,7 @@ set -eu
 # Kali supplies the userspace, repositories, packages, dependencies and tools.
 
 readonly OFFICIAL_INSTALLER='https://offs.ec/2MceZWr'
-readonly OFFICIAL_INSTALLER_FALLBACK='https://gitlab.com/kalilinux/nethunter/build-scripts/kali-nethunter-project/-/raw/master/nethunter-rootless/install-nethunter-termux'
+readonly OFFICIAL_INSTALLER_FALLBACK='https://gitlab.com/kalilinux/nethunter/build-scripts/kali-nethunter-rootless/-/raw/main/install-nethunter-termux'
 readonly installer="$HOME/install-nethunter-termux"
 readonly REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -55,13 +55,7 @@ done
 
 nethunter bash -c 'chmod +x /home/kali/ghost-Kali/kali-menu.sh; touch /home/kali/.bashrc; grep -qxF "cat /home/kali/ghost-Kali/kali-banner.txt" /home/kali/.bashrc || printf "\ncat /home/kali/ghost-Kali/kali-banner.txt\n" >> /home/kali/.bashrc'
 
-nethunter bash -c 'touch /home/kali/.bashrc; grep -qxF "GHOST_KALI_MENU_STARTED=1" /home/kali/.bashrc || cat >> /home/kali/.bashrc <<'''EOF'''
-# Ghost Kali startup menu
-if [[ $- == *i* ]] && [[ -z "$GHOST_KALI_MENU_STARTED" ]] && [[ -f /home/kali/ghost-Kali/kali-menu.sh ]]; then
-    export GHOST_KALI_MENU_STARTED=1
-    bash /home/kali/ghost-Kali/kali-menu.sh
-fi
-EOF'
+nethunter bash -c "echo 'aWYgW1sgJC0gPT0gKmkqIF0dXSAmJiBbWyAtegwiR0hPU1RfS0FMSV9NRU5VX1NUQVJURUQiXSBdXSAmJiBbWyAtZiAiL2hvbWUva2FsaS9naG9zdC1LYWxpL2thbGktbWVudS5zaCJdXTsgdGhlbgogICAgZXhwb3J0IEdIT1NUX0tBTElfTUVOVV9TVEFSVEVEPTEKICAgIGJhc2ggL2hvbWUva2FsaS9naG9zdC1LYWxpL2thbGktbWVudS5zaApmZQo=' | base64 -d >> /home/kali/.bashrc"
 
 echo
 echo "Ghost Kali is now connected to the official Kali NetHunter userspace."
