@@ -320,6 +320,12 @@ main() {
     print_section "Creating startup scripts and aliases"
     
     mkdir -p $PREFIX/bin
+    mkdir -p $PREFIX/share/ghost-kali
+
+    # Install the banner alongside the Ghost Kali menu so every installation has it.
+    if [ -f "$HOME/ghost-Kali/kali-banner.txt" ]; then
+        cp "$HOME/ghost-Kali/kali-banner.txt" "$PREFIX/share/ghost-kali/kali-banner.txt"
+    fi
     
     # Main menu
     cat > $PREFIX/bin/kali-menu.sh << 'EOF'
@@ -329,7 +335,7 @@ main() {
 clear
 
 # Display the Ghost Kali banner from the repository when available.
-BANNER_FILE="$HOME/ghost-Kali/kali-banner.txt"
+BANNER_FILE="${GHOST_KALI_BANNER:-$PREFIX/share/ghost-kali/kali-banner.txt}"
 if [[ -f "$BANNER_FILE" ]]; then
     cat "$BANNER_FILE"
     echo ""
