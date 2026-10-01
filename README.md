@@ -83,3 +83,17 @@ Use security tools only against systems you own or have explicit authorization t
 ## License
 
 MIT for Ghost Kali's own project files. Kali Linux and NetHunter components retain their respective upstream licenses and notices.
+
+
+## Platform support
+
+Ghost Kali keeps the underlying Kali environment separate from its optional menu.
+
+- **Windows:** official Kali Linux WSL 2.
+- **Existing Kali PC:** Ghost is installed as an optional menu; Kali remains the OS.
+- **Native mobile:** only when an official Kali/NetHunter Pro image and compatible kernel exist for the device.
+- **Android without native support:** official NetHunter Rootless is the fallback. It is a Kali userspace on Android, not native Kali.
+
+For Windows, use `install-windows-wsl.ps1 -InstallGhost` from an elevated PowerShell. Kali's official WSL documentation recommends WSL 2 and provides `wsl --install kali-linux`.
+
+For a computer that should boot Kali itself, use the official Kali ISO from the Kali download page and install it as bare metal or dual boot. Ghost Kali should never overwrite Windows partitions automatically.
