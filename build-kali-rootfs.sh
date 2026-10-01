@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-# Ghost Kali Termux builder — creates a rootfs using proot
+# Ghost Kali Termux builder — creates a rootfs using proot and debootstrap
 # Works on Android Termux without requiring actual root
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -13,41 +13,44 @@ KEYRING="$REPO_DIR/.kali-keyring.gpg"
 ARCH="arm64"
 
 log() { printf '\n[ghost-kali] %s\n' "$*"; }
-fatal() { printf '\n[ghost-kali] ERROR: %s\n' "$*" >&2; exit 1; }
 
-# Check if running in Termux
-if [[ -z "${TERMUX_VERSION:-}" ]]; then
-  log "Warning: Not running in Termux. This script is optimized for Termux."
-fi
+log "Ghost Kali Termux Setup"
+log "Target: $TARGET_DIR"
 
 # Download Kali keyring
-log "Downloading official Kali archive keyring"
+log "Step 1: Downloading official Kali archive keyring"
 if ! command -v curl >/dev/null 2>&1; then
+  log "Installing curl..."
   apt-get update
   apt-get install -y curl ca-certificates
 fi
-curl --fail --location --retry 3 --proto '=https' --tlsv1.2 "$KEYRING_URL" -o "$KEYRING" || fatal "Failed to download Kali keyring"
+curl --fail --location --retry 3 --proto '=https' --tlsv1.2 "$KEYRING_URL" -o "$KEYRING"
+log "✓ Keyring downloaded to $KEYRING"
 
 # Check debootstrap
+log "Step 2: Checking debootstrap"
 if ! command -v debootstrap >/dev/null 2>&1; then
-  log "Installing debootstrap"
+  log "Installing debootstrap..."
   apt-get update
   apt-get install -y debootstrap
 fi
+log "✓ debootstrap available"
 
 # Build rootfs
+log "Step 3: Creating $ARCH Kali rootfs"
 if [[ -e "$TARGET_DIR/etc/os-release" ]]; then
-  log "Using existing rootfs at $TARGET_DIR"
+  log "✓ Rootfs already exists at $TARGET_DIR"
 else
   mkdir -p "$TARGET_DIR"
-  log "Creating $ARCH Kali rootfs from official sources"
+  log "Running debootstrap (this takes ~2-5 minutes)..."
   debootstrap --arch="$ARCH" --variant=minbase \
     --components=main,contrib,non-free,non-free-firmware \
-    --keyring="$KEYRING" "$SUITE" "$TARGET_DIR" "$MIRROR" || fatal "debootstrap failed"
+    --keyring="$KEYRING" "$SUITE" "$TARGET_DIR" "$MIRROR"
+  log "✓ Rootfs created"
 fi
 
-# Configure inside rootfs using proot
-log "Configuring Ghost Kali environment"
+# Configure inside rootfs
+log "Step 4: Configuring Ghost Kali environment"
 mkdir -p "$TARGET_DIR/usr/share/keyrings" "$TARGET_DIR/etc/apt/sources.list.d" "$TARGET_DIR/etc/profile.d"
 cp "$KEYRING" "$TARGET_DIR/usr/share/keyrings/kali-archive-keyring.gpg"
 
@@ -59,7 +62,7 @@ Components: main contrib non-free non-free-firmware
 Signed-By: /usr/share/keyrings/kali-archive-keyring.gpg
 EOF
 
-cat > "$TARGET_DIR/etc/os-release" <<'EOF'
+cat > "$TARGET_DIR/etc/os-release" <<'OSEOF'
 PRETTY_NAME="Kali GNU/Linux Rolling"
 NAME="Kali GNU/Linux"
 VERSION_ID="2026.2"
@@ -72,18 +75,18 @@ DOCUMENTATION_URL="https://www.kali.org/docs/"
 SUPPORT_URL="https://www.kali.org/community/"
 BUG_REPORT_URL="https://bugs.kali.org/"
 LOGO=kali-linux
-EOF
+OSEOF
 
-cat > "$TARGET_DIR/etc/ghost-kali-release" <<EOF
+cat > "$TARGET_DIR/etc/ghost-kali-release" <<RELEOF
 Ghost Kali — Kali GNU/Linux Rolling (userspace)
 Powered by official Kali Linux upstream sources and repositories.
 Repository: $MIRROR
 Suite: $SUITE
 Architecture: $ARCH
 This is a Kali-derived custom userspace, not the official Kali distribution.
-EOF
+RELEOF
 
-cat > "$TARGET_DIR/etc/motd" <<'EOF'
+cat > "$TARGET_DIR/etc/motd" <<'MOTDEOF'
        ....:ccc;.
       ......'''':Icd,
    ....''''........:Id;
@@ -110,33 +113,37 @@ Kali GNU/Linux Rolling — Ghost Kali userspace
 Powered by official Kali Linux upstream sources.
 
 Use only on systems you own or are authorized to test.
-EOF
+MOTDEOF
 
-cat > "$TARGET_DIR/etc/profile.d/ghost-kali.sh" <<'EOF'
+cat > "$TARGET_DIR/etc/profile.d/ghost-kali.sh" <<'PROFILEEOF'
 export GHOST_KALI=1
 export GHOST_KALI_ROOTFS=/
 export PS1='\[\033[01;31m\]ghost-kali\[\033[00m\]@\h:\w\$ '
-EOF
+PROFILEEOF
 
-log "Installing base tools inside rootfs using proot"
+log "Step 5: Installing base tools inside rootfs (using proot)"
 proot -0 -r "$TARGET_DIR" -w / /bin/bash -c \
-  'export DEBIAN_FRONTEND=noninteractive; dpkg --configure -a 2>/dev/null || true; apt-get update; apt-get install -y --no-install-recommends bash-completion ca-certificates curl git iproute2 less nano net-tools nmap openssl procps python3 sudo wget whois 2>&1 | tail -20' || log "Package installation completed with warnings (expected in proot)"
+  'export DEBIAN_FRONTEND=noninteractive; dpkg --configure -a 2>/dev/null || true; apt-get update; apt-get install -y --no-install-recommends bash-completion ca-certificates curl git iproute2 less nano net-tools nmap openssl procps python3 sudo wget whois 2>&1 | tail -5' || log "⚠ Package installation completed with expected warnings"
 
-cat <<EOF
+log "✓ Configuration complete"
 
-✓ Ghost Kali rootfs build complete!
+cat <<FINALEOF
+
+╔════════════════════════════════════════════════════════════╗
+║         Ghost Kali rootfs build complete!                 ║
+╚════════════════════════════════════════════════════════════╝
 
 Rootfs location: $TARGET_DIR
 Architecture: $ARCH
 Repository: $MIRROR
 Suite: $SUITE
 
-Enter the environment with:
+ENTER THE ENVIRONMENT:
   $REPO_DIR/enter-ghost-kali.sh
 
-Verify inside:
+VERIFY INSIDE:
   cat /etc/os-release
   cat /etc/ghost-kali-release
   nmap --version
 
-EOF
+FINALEOF
